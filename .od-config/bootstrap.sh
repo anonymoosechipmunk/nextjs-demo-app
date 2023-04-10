@@ -36,6 +36,14 @@ for SERVICE in $SERVICES; do
     systemctl start "$SERVICE"
 done
 
+echo "waiting for devservers to come up"
+# TODO do this via systemd health checks
+wait-for-url() {
+    timeout --foreground -s TERM 30s bash -c \
+        'while [[ "$(curl -s -o /dev/null -m 3 -L -w ''%{http_code}'' ${0})" != "200" ]];\
+        do sleep 1;\
+        done' ${1}
+}
 
 # next dev server
 wait-for-url "http://localhost:3000"
